@@ -48,5 +48,5 @@ figure()
 hold on
 % plot(x(1,:), x(3,:), '--xb')
 plot(xUpdate(3,:),xUpdate(1,:), '--or')
-plot( y_mavlink_local_position_ned_t(:,2), x_mavlink_local_position_ned_t(:,2),'--og')
+% plot( y_mavlink_local_position_ned_t(:,2), x_mavlink_local_position_ned_t(:,2),'--og')
 axis equal
