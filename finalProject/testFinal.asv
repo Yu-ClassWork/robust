@@ -10,25 +10,24 @@ close all; clear all; clc;
 load('2018-02-25 18-35-44.tlog.mat');
 
 % Initial covariance
-covariance = diag([1e-3 1e-3 1e-3 1e-3]);
-u_o = [1; 1; 1; 1];
+covariance = eye(2);
+u_o = [1; 1];
 P = covariance;
-Q=0.1*eye(4);
-F = eye(4);
-F(5) = 1;
-F(15) = 1;
+Q=0.1*eye(2);
+F = eye(2);
+% F(5) = 1;
+% F(15) = 1;
 H=eye(4);
 R=0.1*eye(4);
-x_o = [x_mavlink_local_position_ned_t(1,2) vx_mavlink_local_position_ned_t(1,2) y_mavlink_local_position_ned_t(1,2) vy_mavlink_local_position_ned_t(1,2)];
+x_o = [x_mavlink_local_position_ned_t(1,2) y_mavlink_local_position_ned_t(1,2)];
 x = x_o';
 xUpdate = x;
 
 % plotXY = [];
-for i = 1:length(x_mavlink_local_position_ned_t)
-    %     [target_update, covariance_update, difference] = KalmanFilter(ture_measurement, target_estimate_potition, covariance,u_o);
-    x(:,end)
-    
-    tempX=F*x(:,end)+u_o; % 1
+for i = 1:length(x_mavlink_local_position_ned_t)-1
+    vel = [vx_mavlink_local_position_ned_t(i,2) vy_mavlink_local_position_ned_t(i,2)]'
+    deltTime = [vx_mavlink_local_position_ned_t(i+1,1)-vx_mavlink_local_position_ned_t(i,1) vy_mavlink_local_position_ned_t(i+1,1)-vy_mavlink_local_position_ned_t(i,1)]'
+    tempX=F*x(:,end)+ vel.*deltTime +u_o; % 1
     P=F*P*F'+Q; % 2
     x = [x, tempX];
     
