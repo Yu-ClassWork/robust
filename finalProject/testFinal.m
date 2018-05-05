@@ -1,8 +1,6 @@
 % kalman filter implementation
-% first start off with 1D implementation
 
 % what is the true trajectory
-% expected trajectory (inputs): 5' right -> 2' left -> 7' right
 close all; clear all; clc;
 % load('2018-02-25 18-10-55.tlog.mat');
 % load('2018-02-25 18-23-56.tlog.mat');
@@ -29,22 +27,38 @@ zMeas = [];
 
 % plotXY = [];
 for i = 1:length(x_mavlink_local_position_ned_t)-1
+    % gettting velocity and change in time
     vel = [vx_mavlink_local_position_ned_t(i,2) vy_mavlink_local_position_ned_t(i,2)]';
     deltTime = [vx_mavlink_local_position_ned_t(i+1,1)-vx_mavlink_local_position_ned_t(i,1) vy_mavlink_local_position_ned_t(i+1,1)-vy_mavlink_local_position_ned_t(i,1)]';
+    
+    % obtaining gaussian noise
     tempNoise1 = normrnd(0, 1);
     tempNoise2 = normrnd(0, 1);
     u_o = [tempNoise1; tempNoise2];
+    
+    % prediction
+    % predict step of position
     tempX=F*x(:,end)+ vel.*deltTime +u_o; % 1
     P=F*P*F'+Q; % 2
     x = [x, tempX];
     
+    % getting measurement of t+1
     z = [x_mavlink_local_position_ned_t(i+1,2) y_mavlink_local_position_ned_t(i+1,2)]';
     
+    % update step
+    % Kalman Gain
     temp = H*P*H'+R; % 4
-    K=P*H*(temp)^(-1); % 5 There is a difference between this equation and the one on the article
+    K=P*H*(temp)^(-1); % 5
+    
+    % calculating the difference in predicted and measured values
     difference = z-H*tempX; % 3
+    
+    % updated state value based on measurements
     tempX1=tempX + (K*difference); % 6
+    
+    % updating covariance matrix
     P=(eye(2)-K*H)*P; % 7
+    
     zMeas = [zMeas,z];
     xUpdate = [xUpdate, tempX1];
     
